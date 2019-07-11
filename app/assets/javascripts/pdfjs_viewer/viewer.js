@@ -1763,6 +1763,7 @@ var PDFViewerApplication = {
     eventBus.on('presentationmodechanged', webViewerPresentationModeChanged);
     eventBus.on('presentationmode', webViewerPresentationMode);
     eventBus.on('openfile', webViewerOpenFile);
+    eventBus.on('print', webViewerPrint);
     eventBus.on('firstpage', webViewerFirstPage);
     eventBus.on('lastpage', webViewerLastPage);
     eventBus.on('nextpage', webViewerNextPage);
@@ -1771,6 +1772,8 @@ var PDFViewerApplication = {
     eventBus.on('zoomout', webViewerZoomOut);
     eventBus.on('pagenumberchanged', webViewerPageNumberChanged);
     eventBus.on('scalechanged', webViewerScaleChanged);
+    eventBus.on('rotatecw', webViewerRotateCw);
+    eventBus.on('rotateccw', webViewerRotateCcw);
     eventBus.on('documentproperties', webViewerDocumentProperties);
     eventBus.on('find', webViewerFind);
     eventBus.on('findfromurlhash', webViewerFindFromUrlHash);
@@ -1820,6 +1823,7 @@ var PDFViewerApplication = {
     eventBus.off('presentationmodechanged', webViewerPresentationModeChanged);
     eventBus.off('presentationmode', webViewerPresentationMode);
     eventBus.off('openfile', webViewerOpenFile);
+    eventBus.off('print', webViewerPrint);
     eventBus.off('firstpage', webViewerFirstPage);
     eventBus.off('lastpage', webViewerLastPage);
     eventBus.off('nextpage', webViewerNextPage);
@@ -1828,6 +1832,8 @@ var PDFViewerApplication = {
     eventBus.off('zoomout', webViewerZoomOut);
     eventBus.off('pagenumberchanged', webViewerPageNumberChanged);
     eventBus.off('scalechanged', webViewerScaleChanged);
+    eventBus.off('rotatecw', webViewerRotateCw);
+    eventBus.off('rotateccw', webViewerRotateCcw);
     eventBus.off('documentproperties', webViewerDocumentProperties);
     eventBus.off('find', webViewerFind);
     eventBus.off('findfromurlhash', webViewerFindFromUrlHash);
@@ -2171,6 +2177,9 @@ function webViewerOpenFile() {
   var openFileInputName = PDFViewerApplication.appConfig.openFileInputName;
   document.getElementById(openFileInputName).click();
 }
+function webViewerPrint() {
+  window.print();
+}
 function webViewerFirstPage() {
   if (PDFViewerApplication.pdfDocument) {
     PDFViewerApplication.page = 1;
@@ -2203,6 +2212,14 @@ function webViewerPageNumberChanged(evt) {
 function webViewerScaleChanged(evt) {
   PDFViewerApplication.pdfViewer.currentScaleValue = evt.value;
 }
+
+function webViewerRotateCw() {
+  PDFViewerApplication.rotatePages(90);
+}
+function webViewerRotateCcw() {
+  PDFViewerApplication.rotatePages(-90);
+}
+
 function webViewerDocumentProperties() {
   PDFViewerApplication.pdfDocumentProperties.open();
 }
@@ -8485,18 +8502,6 @@ var SecondaryToolbar = function () {
       eventName: 'presentationmode',
       close: true
     }, {
-      element: options.openFileButton,
-      eventName: 'openfile',
-      close: true
-    }, {
-      element: options.printButton,
-      eventName: 'print',
-      close: true
-    }, {
-      element: options.downloadButton,
-      eventName: 'download',
-      close: true
-    }, {
       element: options.firstPageButton,
       eventName: 'firstpage',
       close: true
@@ -8769,15 +8774,6 @@ var Toolbar = function () {
       });
       items.presentationModeButton.addEventListener('click', function () {
         eventBus.dispatch('presentationmode');
-      });
-      items.openFile.addEventListener('click', function () {
-        eventBus.dispatch('openfile');
-      });
-      items.print.addEventListener('click', function () {
-        eventBus.dispatch('print');
-      });
-      items.download.addEventListener('click', function () {
-        eventBus.dispatch('download');
       });
       items.scaleSelect.oncontextmenu = _ui_utils.noContextMenuHandler;
       eventBus.on('localized', function () {
