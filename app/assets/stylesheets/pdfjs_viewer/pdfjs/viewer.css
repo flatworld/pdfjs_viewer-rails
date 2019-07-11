@@ -2274,3 +2274,13 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
     display: none;
   }
 }
+
+.download,
+#download {
+  display:none !important;
+}
+
+.print,
+#print {
+  display:none !important;
+}
