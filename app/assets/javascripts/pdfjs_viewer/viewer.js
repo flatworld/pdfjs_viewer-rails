@@ -1174,7 +1174,6 @@ var PDFViewerApplication = {
       findBarConfig.findController = _this2.findController;
       findBarConfig.eventBus = eventBus;
       _this2.findBar = new _pdf_find_bar.PDFFindBar(findBarConfig, _this2.l10n);
-      _this2.pdfDocumentProperties = new _pdf_document_properties.PDFDocumentProperties(appConfig.documentProperties, _this2.overlayManager, _this2.l10n);
       _this2.pdfCursorTools = new _pdf_cursor_tools.PDFCursorTools({
         container: container,
         eventBus: eventBus,
@@ -1191,7 +1190,6 @@ var PDFViewerApplication = {
           contextMenuItems: appConfig.fullscreen
         });
       }
-      _this2.passwordPrompt = new _password_prompt.PasswordPrompt(appConfig.passwordOverlay, _this2.overlayManager, _this2.l10n);
       _this2.pdfOutlineViewer = new _pdf_outline_viewer.PDFOutlineViewer({
         container: appConfig.sidebar.outlineView,
         eventBus: eventBus,
@@ -1398,27 +1396,6 @@ var PDFViewerApplication = {
       });
     });
   },
-  download: function download() {
-    var _this4 = this;
-
-    function downloadByUrl() {
-      downloadManager.downloadUrl(url, filename);
-    }
-    var url = this.baseUrl;
-    var filename = (0, _ui_utils.getPDFFileNameFromURL)(this.url);
-    var downloadManager = this.downloadManager;
-    downloadManager.onerror = function (err) {
-      _this4.error('PDF failed to download: ' + err);
-    };
-    if (!this.pdfDocument || !this.downloadComplete) {
-      downloadByUrl();
-      return;
-    }
-    this.pdfDocument.getData().then(function (data) {
-      var blob = (0, _pdfjsLib.createBlob)(data, 'application/pdf');
-      downloadManager.download(blob, url, filename);
-    }).catch(downloadByUrl);
-  },
   fallback: function fallback(featureId) {},
   error: function error(message, moreInfo) {
     var moreInfoText = [this.l10n.get('error_version_info', {
@@ -1511,7 +1488,6 @@ var PDFViewerApplication = {
     var baseDocumentUrl = void 0;
     baseDocumentUrl = null;
     this.pdfLinkService.setDocument(pdfDocument, baseDocumentUrl);
-    this.pdfDocumentProperties.setDocument(pdfDocument, this.url);
     var pdfViewer = this.pdfViewer;
     pdfViewer.setDocument(pdfDocument);
     var firstPagePromise = pdfViewer.firstPagePromise;
@@ -1656,7 +1632,6 @@ var PDFViewerApplication = {
 
       _this6.documentInfo = info;
       _this6.metadata = metadata;
-      console.log('PDF ' + pdfDocument.fingerprint + ' [' + info.PDFFormatVersion + ' ' + (info.Producer || '-').trim() + ' / ' + (info.Creator || '-').trim() + ']' + ' (PDF.js: ' + (_pdfjsLib.version || '-') + (!_pdfjsLib.PDFJS.disableWebGL ? ' [WebGL]' : '') + ')');
       var pdfTitle = void 0;
       if (metadata && metadata.has('dc:title')) {
         var title = metadata.get('dc:title');
@@ -1788,8 +1763,6 @@ var PDFViewerApplication = {
     eventBus.on('presentationmodechanged', webViewerPresentationModeChanged);
     eventBus.on('presentationmode', webViewerPresentationMode);
     eventBus.on('openfile', webViewerOpenFile);
-    eventBus.on('print', webViewerPrint);
-    eventBus.on('download', webViewerDownload);
     eventBus.on('firstpage', webViewerFirstPage);
     eventBus.on('lastpage', webViewerLastPage);
     eventBus.on('nextpage', webViewerNextPage);
@@ -1798,8 +1771,6 @@ var PDFViewerApplication = {
     eventBus.on('zoomout', webViewerZoomOut);
     eventBus.on('pagenumberchanged', webViewerPageNumberChanged);
     eventBus.on('scalechanged', webViewerScaleChanged);
-    eventBus.on('rotatecw', webViewerRotateCw);
-    eventBus.on('rotateccw', webViewerRotateCcw);
     eventBus.on('documentproperties', webViewerDocumentProperties);
     eventBus.on('find', webViewerFind);
     eventBus.on('findfromurlhash', webViewerFindFromUrlHash);
@@ -1849,8 +1820,6 @@ var PDFViewerApplication = {
     eventBus.off('presentationmodechanged', webViewerPresentationModeChanged);
     eventBus.off('presentationmode', webViewerPresentationMode);
     eventBus.off('openfile', webViewerOpenFile);
-    eventBus.off('print', webViewerPrint);
-    eventBus.off('download', webViewerDownload);
     eventBus.off('firstpage', webViewerFirstPage);
     eventBus.off('lastpage', webViewerLastPage);
     eventBus.off('nextpage', webViewerNextPage);
@@ -1859,8 +1828,6 @@ var PDFViewerApplication = {
     eventBus.off('zoomout', webViewerZoomOut);
     eventBus.off('pagenumberchanged', webViewerPageNumberChanged);
     eventBus.off('scalechanged', webViewerScaleChanged);
-    eventBus.off('rotatecw', webViewerRotateCw);
-    eventBus.off('rotateccw', webViewerRotateCcw);
     eventBus.off('documentproperties', webViewerDocumentProperties);
     eventBus.off('find', webViewerFind);
     eventBus.off('findfromurlhash', webViewerFindFromUrlHash);
@@ -2147,8 +2114,6 @@ function webViewerUpdateViewarea(evt) {
     }).catch(function () {});
   }
   var href = PDFViewerApplication.pdfLinkService.getAnchorUrl(location.pdfOpenParams);
-  PDFViewerApplication.appConfig.toolbar.viewBookmark.href = href;
-  PDFViewerApplication.appConfig.secondaryToolbar.viewBookmarkButton.href = href;
   var currentPage = PDFViewerApplication.pdfViewer.getPageView(PDFViewerApplication.page - 1);
   var loading = currentPage.renderingState !== _pdf_rendering_queue.RenderingStates.FINISHED;
   PDFViewerApplication.toolbar.updateLoadingIndicatorState(loading);
@@ -2206,12 +2171,6 @@ function webViewerOpenFile() {
   var openFileInputName = PDFViewerApplication.appConfig.openFileInputName;
   document.getElementById(openFileInputName).click();
 }
-function webViewerPrint() {
-  window.print();
-}
-function webViewerDownload() {
-  PDFViewerApplication.download();
-}
 function webViewerFirstPage() {
   if (PDFViewerApplication.pdfDocument) {
     PDFViewerApplication.page = 1;
@@ -2243,12 +2202,6 @@ function webViewerPageNumberChanged(evt) {
 }
 function webViewerScaleChanged(evt) {
   PDFViewerApplication.pdfViewer.currentScaleValue = evt.value;
-}
-function webViewerRotateCw() {
-  PDFViewerApplication.rotatePages(90);
-}
-function webViewerRotateCcw() {
-  PDFViewerApplication.rotatePages(-90);
 }
 function webViewerDocumentProperties() {
   PDFViewerApplication.pdfDocumentProperties.open();
@@ -2422,7 +2375,6 @@ function webViewerKeyDown(evt) {
   if (cmd === 1 || cmd === 8) {
     switch (evt.keyCode) {
       case 83:
-        PDFViewerApplication.download();
         handled = true;
         break;
     }
@@ -2536,7 +2488,6 @@ function webViewerKeyDown(evt) {
         handled = true;
         break;
       case 82:
-        PDFViewerApplication.rotatePages(-90);
         break;
     }
   }
@@ -3598,34 +3549,21 @@ function getViewerConfiguration() {
       zoomIn: document.getElementById('zoomIn'),
       zoomOut: document.getElementById('zoomOut'),
       viewFind: document.getElementById('viewFind'),
-      openFile: document.getElementById('openFile'),
-      print: document.getElementById('print'),
-      presentationModeButton: document.getElementById('presentationMode'),
-      download: document.getElementById('download'),
-      viewBookmark: document.getElementById('viewBookmark')
+      presentationModeButton: document.getElementById('presentationMode')
     },
     secondaryToolbar: {
       toolbar: document.getElementById('secondaryToolbar'),
       toggleButton: document.getElementById('secondaryToolbarToggle'),
       toolbarButtonContainer: document.getElementById('secondaryToolbarButtonContainer'),
       presentationModeButton: document.getElementById('secondaryPresentationMode'),
-      openFileButton: document.getElementById('secondaryOpenFile'),
-      printButton: document.getElementById('secondaryPrint'),
-      downloadButton: document.getElementById('secondaryDownload'),
-      viewBookmarkButton: document.getElementById('secondaryViewBookmark'),
       firstPageButton: document.getElementById('firstPage'),
       lastPageButton: document.getElementById('lastPage'),
-      pageRotateCwButton: document.getElementById('pageRotateCw'),
-      pageRotateCcwButton: document.getElementById('pageRotateCcw'),
       cursorSelectToolButton: document.getElementById('cursorSelectTool'),
-      cursorHandToolButton: document.getElementById('cursorHandTool'),
-      documentPropertiesButton: document.getElementById('documentProperties')
+      cursorHandToolButton: document.getElementById('cursorHandTool')
     },
     fullscreen: {
       contextFirstPage: document.getElementById('contextFirstPage'),
-      contextLastPage: document.getElementById('contextLastPage'),
-      contextPageRotateCw: document.getElementById('contextPageRotateCw'),
-      contextPageRotateCcw: document.getElementById('contextPageRotateCcw')
+      contextLastPage: document.getElementById('contextLastPage')
     },
     sidebar: {
       mainContainer: document.getElementById('mainContainer'),
@@ -3894,7 +3832,7 @@ var PDFSidebar = function () {
     this.thumbnailView = options.thumbnailView;
     this.outlineView = options.outlineView;
     this.attachmentsView = options.attachmentsView;
-    this.disableNotification = options.disableNotification || false;
+    this.disableNotification = true;
     this.l10n = l10n;
     this._addEventListeners();
   }
@@ -5701,14 +5639,6 @@ var PDFPresentationMode = function () {
       contextMenuItems.contextLastPage.addEventListener('click', function () {
         _this.contextMenuOpen = false;
         _this.eventBus.dispatch('lastpage');
-      });
-      contextMenuItems.contextPageRotateCw.addEventListener('click', function () {
-        _this.contextMenuOpen = false;
-        _this.eventBus.dispatch('rotatecw');
-      });
-      contextMenuItems.contextPageRotateCcw.addEventListener('click', function () {
-        _this.contextMenuOpen = false;
-        _this.eventBus.dispatch('rotateccw');
       });
     }
   }
@@ -8567,10 +8497,6 @@ var SecondaryToolbar = function () {
       eventName: 'download',
       close: true
     }, {
-      element: options.viewBookmarkButton,
-      eventName: null,
-      close: true
-    }, {
       element: options.firstPageButton,
       eventName: 'firstpage',
       close: true
@@ -8578,14 +8504,6 @@ var SecondaryToolbar = function () {
       element: options.lastPageButton,
       eventName: 'lastpage',
       close: true
-    }, {
-      element: options.pageRotateCwButton,
-      eventName: 'rotatecw',
-      close: false
-    }, {
-      element: options.pageRotateCcwButton,
-      eventName: 'rotateccw',
-      close: false
     }, {
       element: options.cursorSelectToolButton,
       eventName: 'switchcursortool',
@@ -8596,16 +8514,10 @@ var SecondaryToolbar = function () {
       eventName: 'switchcursortool',
       eventDetails: { tool: _pdf_cursor_tools.CursorTool.HAND },
       close: true
-    }, {
-      element: options.documentPropertiesButton,
-      eventName: 'documentproperties',
-      close: true
     }];
     this.items = {
       firstPage: options.firstPageButton,
-      lastPage: options.lastPageButton,
-      pageRotateCw: options.pageRotateCwButton,
-      pageRotateCcw: options.pageRotateCcwButton
+      lastPage: options.lastPageButton
     };
     this.mainContainer = mainContainer;
     this.eventBus = eventBus;
@@ -8642,8 +8554,6 @@ var SecondaryToolbar = function () {
     value: function _updateUIState() {
       this.items.firstPage.disabled = this.pageNumber <= 1;
       this.items.lastPage.disabled = this.pageNumber >= this.pagesCount;
-      this.items.pageRotateCw.disabled = this.pagesCount === 0;
-      this.items.pageRotateCcw.disabled = this.pagesCount === 0;
     }
   }, {
     key: '_bindClickListeners',
