@@ -2275,12 +2275,10 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
   }
 }
 
-.download,
-#download {
-  display:none !important;
+#intercom-frame {
+  display: none !important;
 }
 
-.print,
-#print {
-  display:none !important;
+#intercom-container-body {
+  display: none !important;
 }
