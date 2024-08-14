@@ -1859,7 +1859,7 @@ var PDFViewerApplication = {
 };
 var validateFileURL = void 0;
 {
-  var HOSTED_VIEWER_ORIGINS = ['null', 'http://catalog.flatworldknowledgelocal.com:3000', 'https://catalog.flatworldknowledgestage.com', 'https://catalog.flatworldknowledge.com'];
+  var HOSTED_VIEWER_ORIGINS = ['null', 'http://catalog.flatworldknowledgelocal.com:5000', 'https://catalog.flatworldknowledgestage.com', 'https://catalog.flatworldknowledge.com'];
   validateFileURL = function validateFileURL(file) {
     if (file === undefined) {
       return;
