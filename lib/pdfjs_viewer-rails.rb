@@ -13,6 +13,10 @@ module PdfjsViewer
       initializer "pdfjs_viewer-rails.view_helpers" do
         ActionView::Base.send :include, ViewHelpers
       end
+
+      initializer "pdfjs_viewer-rails.assets.precompile" do |app|
+        app.config.assets.precompile += %w(pdfjs_viewer/*)
+      end
     end
   end
 end
